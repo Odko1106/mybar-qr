@@ -1,0 +1,23 @@
+# 실제 서버 주소를 여기에 넣기
+BASE_URL = 'https://yourdomain.com'  # 또는 'http://192.168.0.12:5000'
+
+@app.route('/generate_qr')
+def generate_qr():
+    table_number = request.args.get('table')
+    if not table_number:
+        return "Table number is required", 400
+
+    qr_data = f"{BASE_URL}/table/{table_number}"
+    filename = f"table_{table_number}.png"
+    filepath = os.path.join(QR_FOLDER, filename)
+
+    if not os.path.exists(filepath):
+        img = qrcode.make(qr_data)
+        img.save(filepath)
+
+    qr_url = url_for('static', filename=f'qrs/{filename}')
+    return f"""
+        <h2>QR for Table {table_number}</h2>
+        <img src="{qr_url}"><br>
+        <a href="{qr_url}" download>Download QR</a>
+    """
